@@ -27,7 +27,8 @@ class TestParser(unittest.TestCase):
         parsed = parse(string)
         self.assertEqual(parsed, expected)
 
-        # Case 4 - Cannot parse
+    def test_invalid_format(self):
+        # Cannot parse
         string = ") a b ("
         with self.assertRaises(ValueError) as ctx:
             parse(string)

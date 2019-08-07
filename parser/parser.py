@@ -1,10 +1,8 @@
 
 
-
-def parse(string: str, delimiter: str = ' ', nest_characters: str = '()') -> list:
+def parse(string: str, delimiter: str = ' ', nest_open: str = '(', nest_close: str = ')') -> list:
     """
-    This function is for recursively parsing a nested string structure of opening and closing
-    parentheses and converting it into nested list structure
+    This function is for parsing a nested string structure into a nested list
 
     >>>parse("hello world")
     ["hello", "world"]
@@ -13,30 +11,30 @@ def parse(string: str, delimiter: str = ' ', nest_characters: str = '()') -> lis
     ["a", "b", ["c", "d", ["e", "f"]], "g"]
     """
 
-    nest = [] # Holds the resultant list
-    openers = [] # Holds indices of opening characters
-    closers = [] # Holds indices of closing characters
-    pairs = [] # Holds tuples of opening and closing index pairs
+    nest = [] # For the resultant list
+    openers = [] # Temp list for indices of opening characters
+    closers = [] # Temp list for indices of closing characters
+    nest_pairs = [] # Holds tuples of opening and closing index pairs
 
     # Find the indexes of matching parentheses
     for index, character in enumerate(string):
-        if character == nest_characters[0]:
+        if character == nest_open:
             openers.append(index)
-        elif character == nest_characters[1]:
+        elif character == nest_close:
             closers.append(index)
 
         if openers and closers and len(openers) >= len(closers):
             if openers[-1] > closers[0]:
                 raise ValueError(f"Cannot parse {string}, invalid parentheses")
 
-            pairs.append((openers.pop(-1), closers.pop()))
+            nest_pairs.append((openers.pop(-1), closers.pop()))
 
     # If we have pairs, look at each subsection and recursively apply this function if applicable
-    if pairs:
-        for pair_index, (open_index, close_index) in enumerate(pairs):
+    if nest_pairs:
+        for pair_index, (open_index, close_index) in enumerate(nest_pairs):
             # Check if this pair is a nested pair
             nested = False
-            for sub_pair_index, (sub_open_index, sub_close_index) in enumerate(pairs):
+            for sub_pair_index, (sub_open_index, sub_close_index) in enumerate(nest_pairs):
                 if pair_index == sub_pair_index:
                     continue
 
@@ -49,7 +47,8 @@ def parse(string: str, delimiter: str = ' ', nest_characters: str = '()') -> lis
                 parsed_sub = parse(
                     string=string[open_index + 1:close_index],
                     delimiter=delimiter,
-                    nest_characters=nest_characters
+                    nest_open=nest_open,
+                    nest_close=nest_close
                 )
                 nest.append(parsed_sub)
 
@@ -59,7 +58,7 @@ def parse(string: str, delimiter: str = ' ', nest_characters: str = '()') -> lis
             for index, char in enumerate(string)
             if not [
                 index
-                for start, end in pairs
+                for start, end in nest_pairs
                 if index >= start and index <= end
             ]
         ])
