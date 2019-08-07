@@ -26,6 +26,9 @@ def parse(string: str, delimiter: str = ' ', nest_characters: str = '()') -> lis
             closers.append(index)
 
         if openers and closers and len(openers) >= len(closers):
+            if openers[-1] > closers[0]:
+                raise ValueError(f"Cannot parse {string}, invalid parentheses")
+
             pairs.append((openers.pop(-1), closers.pop()))
 
     # If we have pairs, look at each subsection and recursively apply this function if applicable
